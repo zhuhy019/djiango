@@ -1,4 +1,6 @@
+import datetime
 import os
+import time
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -25,17 +27,19 @@ class QuestionApiView(APIView):
         return Response({"Message":"List of Questions", "Questions_List":allQuestions})
     def post(self,request):
         pred,candID = predicting(request.data.get("Question"))
-        print(pred)
         id,text1=re_text(candID)
         text =text1.values[0]
         dict = {"Question":request.data.get("Question"),'pred': pred,'text':text}
         serializer_obj = QuestionSerializer(data=dict)
+        print(datetime.datetime.now())
         if(serializer_obj.is_valid()):
             Question.objects.create(
-                id=id,
-                Question= serializer_obj.data.get("Question"),
+                id="".join(str(uuid.uuid4()).split("-")).upper(),
+                docid=id,
+                question= serializer_obj.data.get("Question"),
                 pred =serializer_obj.data.get("pred"),
-                text =serializer_obj.data.get("text"))
+                content_text =serializer_obj.data.get("text"),
+                createtime=datetime.datetime.now())
         return Response({"Message":"New question Added!", "Answer":text1.values[0]})
 
 class config:
